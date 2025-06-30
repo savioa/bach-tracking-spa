@@ -33,7 +33,7 @@
     <!-- Atributos -->
     <div v-if="abaAtiva === 'atributos'">
       <div class="columns">
-        <div class="column">
+        <div class="column is-full-mobile">
           <nav class="panel">
             <div class="panel-heading">
               <div class="control">
@@ -62,7 +62,7 @@
           </nav>
         </div>
 
-        <div class="column">
+        <div class="column is-full-mobile">
           <div class="card">
             <header class="card-header">
               <p class="card-header-title">Adicionar Atributo</p>
@@ -111,7 +111,7 @@
     <!-- Concertos -->
     <div v-if="abaAtiva === 'concertos'">
       <div class="columns">
-        <div class="column">
+        <div class="column is-full-mobile">
           <nav class="panel">
             <div class="panel-block" v-for="concerto in concertos" :key="concerto.id"
               :class="{ 'is-active': concertoSelecionado?.id === concerto.id }" @click="concertoSelecionado = concerto">
@@ -140,7 +140,7 @@
           </nav>
         </div>
 
-        <div class="column">
+        <div class="column is-full-mobile">
           <div class="card" v-if="!concertoSelecionado">
             <header class="card-header">
               <p class="card-header-title">Adicionar Concerto</p>
@@ -286,7 +286,7 @@
     <!-- Obras -->
     <div v-if="abaAtiva === 'obras'">
       <div class="columns">
-        <div class="column">
+        <div class="column is-full-mobile">
           <nav class="panel">
             <div class="panel-block" v-for="obra in obras" :key="obra.id">
               <p>
@@ -297,7 +297,7 @@
           </nav>
         </div>
 
-        <div class="column">
+        <div class="column is-full-mobile">
           <div class="card">
             <header class="card-header">
               <p class="card-header-title">Adicionar Obra</p>
