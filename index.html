@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Bach Tracking</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <style>
+    body {
+      padding: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" class="container">
+    <!-- Abas -->
+    <div class="tabs">
+      <ul>
+        <li :class="{ 'is-active': abaAtiva === 'obras' }">
+          <a @click="abaAtiva = 'obras'">Obras</a>
+        </li>
+        <li :class="{ 'is-active': abaAtiva === 'atributos' }">
+          <a @click="abaAtiva = 'atributos'">Atributos</a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Atributos -->
+    <div v-if="abaAtiva === 'atributos'">
+      <div class="columns">
+        <div class="column">
+          <nav class="panel">
+            <div class="panel-heading">
+              <div class="control">
+                <div class="select">
+                  <select v-model="abaAtributosAtiva" name="abaAtributos">
+                    <option value="compositores">Compositores</option>
+                    <option value="artistas">Artistas</option>
+                    <option value="formas">Formas</option>
+                    <option value="tipos">Tipos de Artista</option>
+                    <option value="series">Séries</option>
+                    <option value="locais">Locais</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-block">
+              <p class="control">
+                <input v-model="pesquisa" class="input" type="text" placeholder="Pesquisar" />
+              </p>
+            </div>
+
+            <a class="panel-block" v-for="item in atributosFiltrados" :key="item.id">
+              {{ item.nome }} <span v-if="abaAtributos === 'artistas'">({{ item.detalhe }})</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="column">
+          <div class="card">
+            <header class="card-header">
+              <p class="card-header-title">Adicionar Atributo</p>
+            </header>
+
+            <div class="card-content">
+              <div class="field">
+                <label class="label" for="tipoAtributo">Tipo</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="novoAtributoTipo" name="tipoAtributo">
+                      <option disabled value="">Selecione o tipo do atributo</option>
+                      <option v-for="tipo in tiposAtributos" :key="tipo.id" :value="tipo.id">
+                        {{ tipo.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="valorAtributo">Valor</label>
+                <div class="control">
+                  <input v-model="novoAtributoValor" class="input" name="valorAtributo" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="detalheAtributo">Detalhe</label>
+                <div class="control">
+                  <input v-model="novoAtributoDetalhe" class="input" name="detalheAtributo" />
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="control">
+                  <button @click="adicionarAtributo" class="button is-primary">Adicionar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Obras -->
+    <div v-if="abaAtiva === 'obras'">
+      <div class="columns">
+        <div class="column">
+          <nav class="panel">
+            <div class="panel-block" v-for="obra in obras" :key="obra.id">
+              <p>
+                <strong>{{ gerarTituloObra(obra).tituloPrimario }}</strong><br>
+                <small>{{ gerarTituloObra(obra).tituloSecundario }}</small>
+              </p>
+            </div>
+          </nav>
+        </div>
+
+        <div class="column">
+          <div class="card">
+            <header class="card-header">
+              <p class="card-header-title">Adicionar Obra</p>
+            </header>
+
+            <div class="card-content">
+              <div class="field">
+                <label class="label" for="compositorObra">Compositor</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="novaObraCompositor" name="compositorObra">
+                      <option disabled value="">Selecione um compositor</option>
+                      <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
+                        {{ compositor.detalhe }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="nomeObra">Nome</label>
+                <div class="control">
+                  <input v-model="novaObraNome" class="input" name="nomeObra" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="formaObra">Forma</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="novaObraForma" name="formaObra">
+                      <option disabled value="">Não definida</option>
+                      <option v-for="forma in formas" :key="forma.id" :value="forma.id">
+                        {{ forma.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="instrumentosObra">Instrumentos</label>
+                <div class="control">
+                  <input v-model="novaObraInstrumentos" class="input" name="instrumentosObra" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="numeroObra">Número</label>
+                <div class="control">
+                  <input v-model="novaObraNumero" class="input" name="numeroObra" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="tonalidadeObra">Tonalidade</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="novaObraTonalidade" name="tonalidadeObra">
+                      <option disabled value="">Não definida</option>
+                      <optgroup label="Maior">
+                        <option value="aFlatMajor">A♭</option>
+                        <option value="aMajor">A</option>
+                        <option value="bFlatMajor">B♭</option>
+                        <option value="bMajor">B</option>
+                        <option value="cFlatMajor">C♭</option>
+                        <option value="cMajor">C</option>
+                        <option value="cFlatMajor">C♯</option>
+                        <option value="dFlatMajor">D♭</option>
+                        <option value="dMajor">D</option>
+                        <option value="eFlatMajor">E♭</option>
+                        <option value="ebMajor">E</option>
+                        <option value="fMajor">F</option>
+                        <option value="fSharpMajor">F♯</option>
+                        <option value="gFlatMajor">G♭</option>
+                        <option value="gMajor">G</option>
+                      </optgroup>
+                      <optgroup label="Menor">
+                        <option value="aFlatMinor">A♭</option>
+                        <option value="aMinor">A</option>
+                        <option value="aSharpMinor">A♯</option>
+                        <option value="bFlatMinor">B♭</option>
+                        <option value="bMinor">B</option>
+                        <option value="cMinor">C</option>
+                        <option value="cSharpMinor">C♯</option>
+                        <option value="dMinor">D</option>
+                        <option value="dSharpMinor">D♯</option>
+                        <option value="eFlatMinor">E♭</option>
+                        <option value="eMinor">E</option>
+                        <option value="fMinor">F</option>
+                        <option value="fSharpMinor">F♯</option>
+                        <option value="gMinor">G</option>
+                        <option value="gSharpMinor">G♯</option>
+                      </optgroup>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="opusObra">Opus</label>
+                <div class="control">
+                  <input v-model="novaObraOpus" class="input" name="opusObra" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="catalogoObra">Identificação em catálogo</label>
+                <div class="control">
+                  <input v-model="novaObraCatalogo" class="input" name="catalogoObra" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="apelidoObra">Apelido</label>
+                <div class="control">
+                  <input v-model="novaObraApelido" class="input" name="apelidoObra" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="detalheObra">Detalhe</label>
+                <div class="control">
+                  <input v-model="novaObraDetalhe" class="input" name="detalheObra" />
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="control">
+                  <button @click="adicionarObra" class="button is-primary">Adicionar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            db: null,
+
+            abaAtiva: 'obras',
+            abaAtributosAtiva: 'compositores',
+
+            tiposAtributos: [
+              { id: 'compositor', nome: 'Compositor' },
+              { id: 'artista', nome: 'Artista' },
+              { id: 'forma', nome: 'Forma Musical' },
+              { id: 'tipo', nome: 'Tipo de Artista' },
+              { id: 'serie', nome: 'Séries de Concertos' },
+              { id: 'local', nome: 'Local' }
+            ],
+
+            novoAtributoValor: '',
+            novoAtributoDetalhe: '',
+            novoAtributoTipo: '',
+
+            novaObraCompositor: '',
+            novaObraNome: '',
+            novaObraForma: '',
+            novaObraInstrumentos: '',
+            novaObraNumero: '',
+            novaObraTonalidade: '',
+            novaObraOpus: '',
+            novaObraCatalogo: '',
+            novaObraApelido: '',
+            novaObraDetalhe: '',
+
+            obras: [],
+            compositores: [],
+            artistas: [],
+            formas: [],
+            tipos: [],
+            series: [],
+            locais: [],
+            pesquisa: ''
+          }
+        },
+        computed: {
+          atributosFiltrados() {
+            let lista = [];
+            switch (this.abaAtributosAtiva) {
+              case 'compositores': lista = this.compositores; break;
+              case 'artistas': lista = this.artistas; break;
+              case 'formas': lista = this.formas; break;
+              case 'tipos': lista = this.tipos; break;
+              case 'series': lista = this.series; break;
+              case 'locais': lista = this.locais; break;
+            }
+            if (!this.pesquisa.trim()) return lista;
+            return lista.filter(a => a.nome.toLowerCase().includes(this.pesquisa.toLowerCase()));
+          }
+        },
+        methods: {
+          abrirDB() {
+            const request = indexedDB.open('B2', 1);
+            request.onupgradeneeded = event => {
+              const db = event.target.result;
+              db.createObjectStore('atributos', { keyPath: 'id', autoIncrement: true });
+              db.createObjectStore('obras', { keyPath: 'id', autoIncrement: true });
+            };
+            request.onsuccess = event => {
+              this.db = event.target.result;
+              this.listarAtributos();
+              this.listarObras();
+            };
+            request.onerror = event => {
+              console.error('Erro ao abrir IndexedDB', event.target.errorCode);
+            };
+          },
+          adicionarAtributo() {
+            if (!this.validarAtributo()) return;
+
+            const tipo = this.novoAtributoTipo;
+            const nome = this.novoAtributoValor.trim();
+            const detalhe = this.novoAtributoDetalhe.trim();
+
+            const tx = this.db.transaction('atributos', 'readonly');
+            const store = tx.objectStore('atributos');
+            const request = store.openCursor();
+            let encontrado = false;
+
+            request.onsuccess = event => {
+              const cursor = event.target.result;
+              if (cursor) {
+                if (cursor.value.nome.toLowerCase() === nome.toLowerCase() && cursor.value.tipo === tipo) {
+                  encontrado = true;
+                  return;
+                }
+                cursor.continue();
+              } else if (!encontrado) {
+                const txAdd = this.db.transaction('atributos', 'readwrite');
+
+                const obj = { nome, tipo, detalhe }
+
+                const requestAdd = txAdd.objectStore('atributos').add(obj);
+                requestAdd.onsuccess = (event) => {
+                  const idGerado = event.target.result;
+                  const novoObj = { ...obj, id: idGerado };
+
+                  switch (tipo) {
+                    case 'compositor': this.compositores.push(novoObj); break;
+                    case 'artista': this.artistas.push(novoObj); break;
+                    case 'forma': this.formas.push(novoObj); break;
+                    case 'tipo': this.tipos.push(novoObj); break;
+                    case 'serie': this.series.push(novoObj); break;
+                    case 'local': this.locais.push(novoObj); break;
+                  }
+
+                  this.novoAtributoTipo = '';
+                  this.novoAtributoValor = '';
+                  this.novoAtributoDetalhe = '';
+                };
+              }
+            };
+          },
+          validarAtributo() {
+            return this.novoAtributoTipo &&
+              this.novoAtributoValor.trim() &&
+              (this.novoAtributoTipo !== 'compositor' || (this.novoAtributoDetalhe && this.novoAtributoValor.includes(this.novoAtributoDetalhe))) &&
+              (this.novoAtributoTipo !== 'artista' || (this.novoAtributoDetalhe && this.tipos.some(t => t.nome === this.novoAtributoDetalhe)));
+          },
+          listarAtributos() {
+            const tx = this.db.transaction('atributos', 'readonly');
+            const store = tx.objectStore('atributos');
+            const request = store.openCursor();
+            const all = { compositores: [], artistas: [], formas: [], tipos: [], series: [], locais: [] };
+            request.onsuccess = event => {
+              const cursor = event.target.result;
+              if (cursor) {
+                switch (cursor.value.tipo) {
+                  case 'compositor': all.compositores.push(cursor.value); break;
+                  case 'artista': all.artistas.push(cursor.value); break;
+                  case 'forma': all.formas.push(cursor.value); break;
+                  case 'tipo': all.tipos.push(cursor.value); break;
+                  case 'serie': all.series.push(cursor.value); break;
+                  case 'local': all.locais.push(cursor.value); break;
+                }
+                cursor.continue();
+              } else {
+                this.compositores = all.compositores;
+                this.artistas = all.artistas;
+                this.formas = all.formas;
+                this.tipos = all.tipos;
+                this.series = all.series;
+                this.locais = all.locais;
+              }
+            };
+          },
+          adicionarObra() {
+            if (!this.novaObraCompositor) return;
+
+            const compositorId = this.novaObraCompositor;
+            const nome = this.novaObraNome.trim();
+            const formaId = this.novaObraForma;
+            const instrumentos = this.novaObraInstrumentos.trim();
+            const numero = this.novaObraNumero.trim();
+            const tonalidade = this.novaObraTonalidade;
+            const opus = this.novaObraOpus.trim();
+            const catalogo = this.novaObraCatalogo.trim();
+            const apelido = this.novaObraApelido.trim();
+            const detalhe = this.novaObraDetalhe.trim();
+
+            const obj = { compositorId, nome, formaId, instrumentos, numero, tonalidade, opus, catalogo, apelido, detalhe };
+
+            const tx = this.db.transaction('obras', 'readwrite');
+            tx.objectStore('obras').add(obj);
+            tx.oncomplete = () => {
+              this.obras.push(obj);
+              this.novaObraCompositor = '';
+              this.novaObraNome = '';
+              this.novaObraForma = '';
+              this.novaObraInstrumentos = '';
+              this.novaObraNumero = '';
+              this.novaObraTonalidade = '';
+              this.novaObraOpus = '';
+              this.novaObraCatalogo = '';
+              this.novaObraApelido = '';
+              this.novaObraDetalhe = '';
+            };
+          },
+          listarObras() {
+            const tx = this.db.transaction('obras', 'readonly');
+            const store = tx.objectStore('obras');
+            const request = store.openCursor();
+            const obras = [];
+            request.onsuccess = event => {
+              const cursor = event.target.result;
+              if (cursor) {
+                obras.push(cursor.value);
+                cursor.continue();
+              } else {
+                this.obras = obras;
+              }
+            };
+          },
+          gerarTituloObra(obra) {
+            const forma = this.formas.find(f => f.id === obra.formaId)?.nome || '';
+
+            let partes = [];
+
+            if (forma) {
+              partes.push(forma);
+            }
+
+            if (obra.instrumentos) {
+              partes.push(`para ${obra.instrumentos}`);
+            }
+
+            if (obra.numero) {
+              partes.push(`n.º ${obra.numero}`);
+            }
+
+            if (obra.tonalidade) {
+              partes.push(`em ${this.formatarTonalidade(obra.tonalidade)}`);
+            }
+
+            if (obra.opus) {
+              partes.push(`, Op. ${obra.opus}`);
+            }
+
+            if (obra.catalogo) {
+              partes.push(`, ${obra.catalogo}`);
+            }
+
+            if (obra.apelido) {
+              partes.push(`, “${obra.apelido}”`);
+            }
+
+            const titulo = partes.join(' ')
+              .replace(/\s+/g, ' ')
+              .replace(/\s+,/g, ',')
+              .replace(/^,?\s*/, '')
+              .trim();
+
+            const tituloPrimario = obra.nome || titulo;
+            const tituloSecundario = obra.nome ? titulo : '';
+
+            return { tituloPrimario, tituloSecundario };
+          },
+
+          formatarTonalidade(codigo) {
+            return codigo
+              .replace('Flat', ' bemol ').replace('Sharp', ' sustenido ')
+              .replace('Major', ' maior ').replace('Minor', ' menor ')
+              .replace('a ', 'Lá ').replace('b ', 'Si ').replace('c ', 'Dó ').replace('d ', 'Ré ').replace('e ', 'Mi ').replace('f ', 'Fá ').replace('g ', 'Sol ');
+          }
+        },
+        mounted() {
+          this.abrirDB();
+        }
+      }).mount('#app');
+    </script>
+</body>
+
+</html>
