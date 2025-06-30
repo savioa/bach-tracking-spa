@@ -38,7 +38,7 @@
             <div class="panel-heading">
               <div class="control">
                 <div class="select">
-                  <select v-model="abaAtributosAtiva" name="abaAtributos">
+                  <select v-model="abaAtributosAtiva">
                     <option value="compositores">Compositores</option>
                     <option value="artistas">Artistas</option>
                     <option value="formas">Formas</option>
@@ -70,10 +70,10 @@
 
             <div class="card-content">
               <div class="field">
-                <label class="label" for="tipoAtributo">Tipo</label>
+                <label class="label">Tipo</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novoAtributoTipo" name="tipoAtributo">
+                    <select v-model="novoAtributoTipo">
                       <option disabled value="">Selecione o tipo do atributo</option>
                       <option v-for="tipo in tiposAtributos" :key="tipo.id" :value="tipo.id">
                         {{ tipo.nome }}
@@ -84,16 +84,16 @@
               </div>
 
               <div class="field">
-                <label class="label" for="valorAtributo">Valor</label>
+                <label class="label">Valor</label>
                 <div class="control">
-                  <input v-model="novoAtributoValor" class="input" name="valorAtributo" />
+                  <input v-model="novoAtributoValor" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="detalheAtributo">Detalhe</label>
+                <label class="label">Detalhe</label>
                 <div class="control">
-                  <input v-model="novoAtributoDetalhe" class="input" name="detalheAtributo" />
+                  <input v-model="novoAtributoDetalhe" class="input" />
                 </div>
               </div>
 
@@ -113,64 +113,59 @@
       <div class="columns">
         <div class="column">
           <nav class="panel">
-            <a class="panel-block" v-for="concerto in concertos" :key="concerto.id"
+            <div class="panel-block" v-for="concerto in concertos" :key="concerto.id"
               :class="{ 'is-active': concertoSelecionado?.id === concerto.id }" @click="concertoSelecionado = concerto">
-              {{ concerto.data }} - {{ series.find(s => s.id === concerto.serieId)?.nome }}
-            </a>
+              <p>
+                {{ concerto.data }} - {{ series.find(s => s.id === concerto.serieId)?.nome }}
+              </p>
+            </div>
           </nav>
 
-          <div v-if="concertoSelecionado">
-            <h2 class="title is-5">Obras no concerto</h2>
-            <ul>
-              <li v-for="obra in obrasDoConcerto(concertoSelecionado)" :key="obra.id">
+          <nav class="panel" v-if="concertoSelecionado">
+            <p class="panel-heading">Obras no Concerto</p>
+
+            <div class="panel-block" v-for="obra in obrasDoConcerto(concertoSelecionado)" :key="obra.id">
+              <p>
                 {{ gerarTituloObra(obra).tituloPrimario }}
-              </li>
-            </ul>
-
-            <div class="field">
-              <label class="label">Adicionar obra</label>
-              <div class="control">
-                <div class="select">
-                  <select v-model="obraSelecionadaParaAdicionar">
-                    <option disabled value="">Selecione uma obra</option>
-                    <option v-for="obra in obras" :value="obra.id">{{ gerarTituloObra(obra).tituloPrimario }}</option>
-                  </select>
-                </div>
-              </div>
+              </p>
             </div>
+          </nav>
 
-            <div class="field">
-              <button @click="adicionarObraAoConcerto" class="button is-success">Adicionar</button>
+          <nav class="panel" v-if="concertoSelecionado">
+            <p class="panel-heading">Artistas no Concerto</p>
+
+            <div class="panel-block" v-for="artista in artistasDoConcerto(concertoSelecionado)" :key="artista.id">
+              <p>{{ artista.nome }}</p>
             </div>
-          </div>
+          </nav>
         </div>
 
         <div class="column">
-          <div class="card">
+          <div class="card" v-if="!concertoSelecionado">
             <header class="card-header">
               <p class="card-header-title">Adicionar Concerto</p>
             </header>
 
             <div class="card-content">
               <div class="field">
-                <label class="label" for="nomeConcerto">Nome</label>
+                <label class="label">Nome</label>
                 <div class="control">
-                  <input v-model="novoConcertoNome" class="input" name="nomeConcerto" />
+                  <input v-model="novoConcertoNome" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="dataConcerto">Data</label>
+                <label class="label">Data</label>
                 <div class="control">
-                  <input v-model="novoConcertoData" class="input" name="dataConcerto" />
+                  <input v-model="novoConcertoData" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="serieConcerto">Série</label>
+                <label class="label">Série</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novoConcertoSerie" name="serieConcerto">
+                    <select v-model="novoConcertoSerie">
                       <option disabled value="">Não definida</option>
                       <option v-for="serie in series" :key="serie.id" :value="serie.id">
                         {{ serie.nome }}
@@ -181,17 +176,17 @@
               </div>
 
               <div class="field">
-                <label class="label" for="instanciaConcerto">Instância</label>
+                <label class="label">Instância</label>
                 <div class="control">
-                  <input v-model="novoConcertoInstancia" class="input" type="number" name="instanciaConcerto" />
+                  <input v-model="novoConcertoInstancia" class="input" type="number" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="localConcerto">Local</label>
+                <label class="label">Local</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novoConcertoLocal" name="localConcerto">
+                    <select v-model="novoConcertoLocal">
                       <option disabled value="">Não definido</option>
                       <option v-for="local in locais" :key="local.id" :value="local.id">
                         {{ local.nome }}
@@ -205,6 +200,82 @@
                 <div class="control">
                   <button @click="adicionarConcerto" class="button is-primary">Adicionar</button>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" v-if="concertoSelecionado">
+            <header class="card-header">
+              <p class="card-header-title">Adicionar Obra ao Concerto</p>
+            </header>
+            <div class="card-content">
+              <div class="field">
+                <label class="label">Compositor</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="compositorFiltroParaObra">
+                      <option value="">Todos os compositores</option>
+                      <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
+                        {{ compositor.detalhe }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label">Obra</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="obraSelecionadaParaAdicionar">
+                      <option disabled value="">Selecione uma obra</option>
+                      <option v-for="obra in obrasFiltradasPorCompositor" :value="obra.id">{{
+                        gerarTituloObra(obra).tituloPrimario }}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <button @click="adicionarObraAoConcerto" class="button is-primary">Adicionar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" v-if="concertoSelecionado">
+            <header class="card-header">
+              <p class="card-header-title">Adicionar Artista ao Concerto</p>
+            </header>
+            <div class="card-content">
+              <div class="field">
+                <label class="label">Tipo de Artista</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="tipoFiltroParaArtista">
+                      <option value="">Todos os tipos de artista</option>
+                      <option v-for="tipo in tipos" :key="tipo.id" :value="tipo.nome">
+                        {{ tipo.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label">Artista</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="artistaSelecionadoParaAdicionar">
+                      <option disabled value="">Selecione um artista</option>
+                      <option v-for="artista in artistasFiltradosPorTipo" :value="artista.id">{{ artista.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <button @click="adicionarArtistaAoConcerto" class="button is-primary">Adicionar</button>
               </div>
             </div>
           </div>
@@ -234,10 +305,10 @@
 
             <div class="card-content">
               <div class="field">
-                <label class="label" for="compositorObra">Compositor</label>
+                <label class="label">Compositor</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novaObraCompositor" name="compositorObra">
+                    <select v-model="novaObraCompositor">
                       <option disabled value="">Selecione um compositor</option>
                       <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
                         {{ compositor.detalhe }}
@@ -248,17 +319,17 @@
               </div>
 
               <div class="field">
-                <label class="label" for="nomeObra">Nome</label>
+                <label class="label">Nome</label>
                 <div class="control">
-                  <input v-model="novaObraNome" class="input" name="nomeObra" />
+                  <input v-model="novaObraNome" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="formaObra">Forma</label>
+                <label class="label">Forma</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novaObraForma" name="formaObra">
+                    <select v-model="novaObraForma">
                       <option disabled value="">Não definida</option>
                       <option v-for="forma in formas" :key="forma.id" :value="forma.id">
                         {{ forma.nome }}
@@ -269,24 +340,24 @@
               </div>
 
               <div class="field">
-                <label class="label" for="instrumentosObra">Instrumentos</label>
+                <label class="label">Instrumentos</label>
                 <div class="control">
-                  <input v-model="novaObraInstrumentos" class="input" name="instrumentosObra" />
+                  <input v-model="novaObraInstrumentos" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="numeroObra">Número</label>
+                <label class="label">Número</label>
                 <div class="control">
-                  <input v-model="novaObraNumero" class="input" name="numeroObra" />
+                  <input v-model="novaObraNumero" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="tonalidadeObra">Tonalidade</label>
+                <label class="label">Tonalidade</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novaObraTonalidade" name="tonalidadeObra">
+                    <select v-model="novaObraTonalidade">
                       <option disabled value="">Não definida</option>
                       <optgroup label="Maior">
                         <option value="aFlatMajor">A♭</option>
@@ -328,30 +399,30 @@
               </div>
 
               <div class="field">
-                <label class="label" for="opusObra">Opus</label>
+                <label class="label">Opus</label>
                 <div class="control">
-                  <input v-model="novaObraOpus" class="input" name="opusObra" />
+                  <input v-model="novaObraOpus" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="catalogoObra">Identificação em catálogo</label>
+                <label class="label">Identificação em catálogo</label>
                 <div class="control">
-                  <input v-model="novaObraCatalogo" class="input" name="catalogoObra" />
+                  <input v-model="novaObraCatalogo" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="apelidoObra">Apelido</label>
+                <label class="label">Apelido</label>
                 <div class="control">
-                  <input v-model="novaObraApelido" class="input" name="apelidoObra" />
+                  <input v-model="novaObraApelido" class="input" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="label" for="detalheObra">Detalhe</label>
+                <label class="label">Detalhe</label>
                 <div class="control">
-                  <input v-model="novaObraDetalhe" class="input" name="detalheObra" />
+                  <input v-model="novaObraDetalhe" class="input" />
                 </div>
               </div>
 
@@ -418,7 +489,10 @@
             pesquisa: '',
 
             concertoSelecionado: null,
-            obraSelecionadaParaAdicionar: ''
+            obraSelecionadaParaAdicionar: '',
+            artistaSelecionadoParaAdicionar: '',
+            compositorFiltroParaObra: '',
+            tipoFiltroParaArtista: '',
           }
         },
         computed: {
@@ -434,6 +508,18 @@
             }
             if (!this.pesquisa.trim()) return lista;
             return lista.filter(a => a.nome.toLowerCase().includes(this.pesquisa.toLowerCase()));
+          },
+          obrasFiltradasPorCompositor() {
+            if (!this.compositorFiltroParaObra) {
+              return this.obras;
+            }
+            return this.obras.filter(o => o.compositorId === this.compositorFiltroParaObra);
+          },
+          artistasFiltradosPorTipo() {
+            if (!this.tipoFiltroParaArtista) {
+              return this.artistas;
+            }
+            return this.artistas.filter(a => a.detalhe === this.tipoFiltroParaArtista);
           }
         },
         methods: {
@@ -599,7 +685,7 @@
 
             if (!data) return;
 
-            const obj = { nome, data, serieId, instancia, localId, obrasIds: [] };
+            const obj = { nome, data, serieId, instancia, localId, obrasIds: [], artistasIds: [] };
 
             const tx = this.db.transaction('concertos', 'readwrite');
 
@@ -685,6 +771,9 @@
           obrasDoConcerto(concerto) {
             return this.obras.filter(o => concerto.obrasIds?.includes(o.id));
           },
+          artistasDoConcerto(concerto) {
+            return this.artistas.filter(a => concerto.artistasIds?.includes(a.id));
+          },
           adicionarObraAoConcerto() {
             const obraId = this.obraSelecionadaParaAdicionar;
             if (!obraId || !this.concertoSelecionado) return;
@@ -714,6 +803,37 @@
 
             req.onerror = (event) => {
               console.error('Erro ao salvar concerto com obras:', event.target.error);
+            };
+          },
+          adicionarArtistaAoConcerto() {
+            const artistaId = this.artistaSelecionadoParaAdicionar;
+            if (!artistaId || !this.concertoSelecionado) return;
+
+            if (!this.concertoSelecionado.artistasIds) {
+              this.concertoSelecionado.artistasIds = [];
+            }
+
+            if (this.concertoSelecionado.artistasIds.includes(artistaId)) return;
+
+            this.concertoSelecionado.artistasIds.push(artistaId);
+
+            const tx = this.db.transaction('concertos', 'readwrite');
+            const store = tx.objectStore('concertos');
+
+            const objLimpo = JSON.parse(JSON.stringify(this.concertoSelecionado));
+
+            const req = store.put(objLimpo);
+
+            req.onsuccess = () => {
+              const idx = this.concertos.findIndex(c => c.id === this.concertoSelecionado.id);
+              if (idx !== -1) {
+                this.concertos[idx] = { ...objLimpo };
+              }
+              this.artistaSelecionadoParaAdicionar = '';
+            };
+
+            req.onerror = (event) => {
+              console.error('Erro ao salvar concerto com artistas:', event.target.error);
             };
           }
         },
