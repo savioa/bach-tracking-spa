@@ -18,6 +18,9 @@
     <!-- Abas -->
     <div class="tabs">
       <ul>
+        <li :class="{ 'is-active': abaAtiva === 'concertos' }">
+          <a @click="abaAtiva = 'concertos'">Concertos</a>
+        </li>
         <li :class="{ 'is-active': abaAtiva === 'obras' }">
           <a @click="abaAtiva = 'obras'">Obras</a>
         </li>
@@ -97,6 +100,110 @@
               <div class="field">
                 <div class="control">
                   <button @click="adicionarAtributo" class="button is-primary">Adicionar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concertos -->
+    <div v-if="abaAtiva === 'concertos'">
+      <div class="columns">
+        <div class="column">
+          <nav class="panel">
+            <a class="panel-block" v-for="concerto in concertos" :key="concerto.id"
+              :class="{ 'is-active': concertoSelecionado?.id === concerto.id }" @click="concertoSelecionado = concerto">
+              {{ concerto.data }} - {{ series.find(s => s.id === concerto.serieId)?.nome }}
+            </a>
+          </nav>
+
+          <div v-if="concertoSelecionado">
+            <h2 class="title is-5">Obras no concerto</h2>
+            <ul>
+              <li v-for="obra in obrasDoConcerto(concertoSelecionado)" :key="obra.id">
+                {{ gerarTituloObra(obra).tituloPrimario }}
+              </li>
+            </ul>
+
+            <div class="field">
+              <label class="label">Adicionar obra</label>
+              <div class="control">
+                <div class="select">
+                  <select v-model="obraSelecionadaParaAdicionar">
+                    <option disabled value="">Selecione uma obra</option>
+                    <option v-for="obra in obras" :value="obra.id">{{ gerarTituloObra(obra).tituloPrimario }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <button @click="adicionarObraAoConcerto" class="button is-success">Adicionar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="card">
+            <header class="card-header">
+              <p class="card-header-title">Adicionar Concerto</p>
+            </header>
+
+            <div class="card-content">
+              <div class="field">
+                <label class="label" for="nomeConcerto">Nome</label>
+                <div class="control">
+                  <input v-model="novoConcertoNome" class="input" name="nomeConcerto" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="dataConcerto">Data</label>
+                <div class="control">
+                  <input v-model="novoConcertoData" class="input" name="dataConcerto" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="serieConcerto">Série</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="novoConcertoSerie" name="serieConcerto">
+                      <option disabled value="">Não definida</option>
+                      <option v-for="serie in series" :key="serie.id" :value="serie.id">
+                        {{ serie.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="instanciaConcerto">Instância</label>
+                <div class="control">
+                  <input v-model="novoConcertoInstancia" class="input" type="number" name="instanciaConcerto" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="localConcerto">Local</label>
+                <div class="control">
+                  <div class="select">
+                    <select v-model="novoConcertoLocal" name="localConcerto">
+                      <option disabled value="">Não definido</option>
+                      <option v-for="local in locais" :key="local.id" :value="local.id">
+                        {{ local.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="control">
+                  <button @click="adicionarConcerto" class="button is-primary">Adicionar</button>
                 </div>
               </div>
             </div>
@@ -267,7 +374,7 @@
           return {
             db: null,
 
-            abaAtiva: 'obras',
+            abaAtiva: 'concertos',
             abaAtributosAtiva: 'compositores',
 
             tiposAtributos: [
@@ -283,6 +390,12 @@
             novoAtributoDetalhe: '',
             novoAtributoTipo: '',
 
+            novoConcertoNome: '',
+            novoConcertoData: '',
+            novoConcertoSerie: '',
+            novoConcertoInstancia: '',
+            novoConcertoLocal: '',
+
             novaObraCompositor: '',
             novaObraNome: '',
             novaObraForma: '',
@@ -294,6 +407,7 @@
             novaObraApelido: '',
             novaObraDetalhe: '',
 
+            concertos: [],
             obras: [],
             compositores: [],
             artistas: [],
@@ -301,7 +415,10 @@
             tipos: [],
             series: [],
             locais: [],
-            pesquisa: ''
+            pesquisa: '',
+
+            concertoSelecionado: null,
+            obraSelecionadaParaAdicionar: ''
           }
         },
         computed: {
@@ -321,16 +438,27 @@
         },
         methods: {
           abrirDB() {
-            const request = indexedDB.open('B2', 1);
+            const request = indexedDB.open('B2', 2);
             request.onupgradeneeded = event => {
               const db = event.target.result;
-              db.createObjectStore('atributos', { keyPath: 'id', autoIncrement: true });
-              db.createObjectStore('obras', { keyPath: 'id', autoIncrement: true });
+
+              if (!db.objectStoreNames.contains('atributos')) {
+                db.createObjectStore('atributos', { keyPath: 'id', autoIncrement: true });
+              }
+
+              if (!db.objectStoreNames.contains('obras')) {
+                db.createObjectStore('obras', { keyPath: 'id', autoIncrement: true });
+              }
+
+              if (!db.objectStoreNames.contains('concertos')) {
+                db.createObjectStore('concertos', { keyPath: 'id', autoIncrement: true });
+              }
             };
             request.onsuccess = event => {
               this.db = event.target.result;
               this.listarAtributos();
               this.listarObras();
+              this.listarConcertos();
             };
             request.onerror = event => {
               console.error('Erro ao abrir IndexedDB', event.target.errorCode);
@@ -462,6 +590,48 @@
               }
             };
           },
+          adicionarConcerto() {
+            const nome = this.novoConcertoNome.trim();
+            const data = this.novoConcertoData.trim();
+            const serieId = this.novoConcertoSerie;
+            const instancia = parseInt(this.novoConcertoInstancia, 10);
+            const localId = this.novoConcertoLocal;
+
+            if (!data) return;
+
+            const obj = { nome, data, serieId, instancia, localId, obrasIds: [] };
+
+            const tx = this.db.transaction('concertos', 'readwrite');
+
+            const requestAdd = tx.objectStore('concertos').add(obj);
+
+            requestAdd.onsuccess = (event) => {
+              const idGerado = event.target.result;
+              const novoObj = { ...obj, id: idGerado };
+              this.concertos.push(novoObj);
+
+              this.novoConcertoNome = '';
+              this.novoConcertoData = '';
+              this.novoConcertoSerie = '';
+              this.novoConcertoInstancia = '';
+              this.novoConcertoLocal = '';
+            }
+          },
+          listarConcertos() {
+            const tx = this.db.transaction('concertos', 'readonly');
+            const store = tx.objectStore('concertos');
+            const request = store.openCursor();
+            const concertos = [];
+            request.onsuccess = event => {
+              const cursor = event.target.result;
+              if (cursor) {
+                concertos.push(cursor.value);
+                cursor.continue();
+              } else {
+                this.concertos = concertos;
+              }
+            };
+          },
           gerarTituloObra(obra) {
             const forma = this.formas.find(f => f.id === obra.formaId)?.nome || '';
 
@@ -506,12 +676,45 @@
 
             return { tituloPrimario, tituloSecundario };
           },
-
           formatarTonalidade(codigo) {
             return codigo
               .replace('Flat', ' bemol ').replace('Sharp', ' sustenido ')
               .replace('Major', ' maior ').replace('Minor', ' menor ')
               .replace('a ', 'Lá ').replace('b ', 'Si ').replace('c ', 'Dó ').replace('d ', 'Ré ').replace('e ', 'Mi ').replace('f ', 'Fá ').replace('g ', 'Sol ');
+          },
+          obrasDoConcerto(concerto) {
+            return this.obras.filter(o => concerto.obrasIds?.includes(o.id));
+          },
+          adicionarObraAoConcerto() {
+            const obraId = this.obraSelecionadaParaAdicionar;
+            if (!obraId || !this.concertoSelecionado) return;
+
+            if (!this.concertoSelecionado.obrasIds) {
+              this.concertoSelecionado.obrasIds = [];
+            }
+
+            if (this.concertoSelecionado.obrasIds.includes(obraId)) return;
+
+            this.concertoSelecionado.obrasIds.push(obraId);
+
+            const tx = this.db.transaction('concertos', 'readwrite');
+            const store = tx.objectStore('concertos');
+
+            const objLimpo = JSON.parse(JSON.stringify(this.concertoSelecionado));
+
+            const req = store.put(objLimpo);
+
+            req.onsuccess = () => {
+              const idx = this.concertos.findIndex(c => c.id === this.concertoSelecionado.id);
+              if (idx !== -1) {
+                this.concertos[idx] = { ...objLimpo };
+              }
+              this.obraSelecionadaParaAdicionar = '';
+            };
+
+            req.onerror = (event) => {
+              console.error('Erro ao salvar concerto com obras:', event.target.error);
+            };
           }
         },
         mounted() {
