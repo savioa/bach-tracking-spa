@@ -134,7 +134,7 @@
                 {{ concerto.data }} - {{ locais.find(l => l.id === concerto.localId)?.nome || 'Sem local' }}
               </p>
             </div>
-            <a class="panel-block">{{ this.concertos.length }}</a>
+            <a class="panel-block"><button @click="exportarDados" class="button is-primary">Exportar {{ this.concertos.length }} Concertos</button></a>
           </nav>
 
           <nav class="panel" v-if="concertoSelecionado" ref="painelObras">
@@ -571,6 +571,11 @@
           };
         },
         adicionarAtributo() {
+          // const txT = this.db.transaction('atributos', 'readwrite');
+          // const storeT = txT.objectStore('atributos');
+
+          // storeT.delete(7)
+
           if (!this.validarAtributo()) return;
 
           const tipo = this.novoAtributoTipo;
@@ -878,6 +883,39 @@
           req.onerror = (event) => {
             console.error('Erro ao salvar concerto com artistas:', event.target.error);
           };
+        },
+        exportarDados() {
+          const db = this.db;
+          const exportacao = {};
+          const promises = [];
+
+          ['atributos', 'obras', 'concertos'].forEach(storeName => {
+            promises.push(new Promise((resolve, reject) => {
+              const tx = db.transaction(storeName, 'readonly');
+              const store = tx.objectStore(storeName);
+              const request = store.getAll();
+              request.onsuccess = () => {
+                exportacao[storeName] = request.result;
+                resolve();
+              };
+              request.onerror = event => reject(event.target.error);
+            }));
+          });
+
+          Promise.all(promises).then(() => {
+            const json = JSON.stringify(exportacao, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'bach-up.json';
+            a.click();
+
+            URL.revokeObjectURL(url);
+          }).catch(error => {
+            console.error('Erro ao exportar dados:', error);
+          });
         }
       },
       mounted() {
