@@ -57,7 +57,8 @@
               </p>
             </div>
 
-            <a class="panel-block" v-for="item in atributosFiltrados" :key="item.id">{{ item.nome }}</a>
+            <a class="panel-block" v-for="item in atributosFiltrados" :key="item.id">{{ item.nome }} ({{ item.id }})</a>
+            <a class="panel-block" v-if="filtroTipoAtributo">{{ atributosFiltrados.length }}</a>
           </nav>
         </div>
 
@@ -133,6 +134,7 @@
                 {{ concerto.data }} - {{ locais.find(l => l.id === concerto.localId)?.nome || 'Sem local' }}
               </p>
             </div>
+            <a class="panel-block">{{ this.concertos.length }}</a>
           </nav>
 
           <nav class="panel" v-if="concertoSelecionado" ref="painelObras">
@@ -309,6 +311,8 @@
                 <small>{{ gerarTituloObra(obra).tituloSecundario }}</small>
               </p>
             </div>
+
+            <a class="panel-block">{{ this.obras.length }}</a>
           </nav>
         </div>
 
