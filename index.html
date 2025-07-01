@@ -37,17 +37,21 @@
         <div class="column is-full-mobile">
           <nav class="panel">
             <div class="panel-heading">
-              <div class="control">
-                <div class="select">
-                  <select v-model="filtroTipoAtributo">
-                    <option value="compositor">Compositores</option>
-                    <option value="artista">Artistas</option>
-                    <option value="forma">Formas</option>
-                    <option value="tipo">Tipos de Artista</option>
-                    <option value="serie">Séries</option>
-                    <option value="local">Locais</option>
-                  </select>
+              <div class="field is-grouped">
+                <div class="control">
+                  <div class="select">
+                    <select v-model="filtroTipoAtributo">
+                      <option value="compositor">Compositores</option>
+                      <option value="artista">Artistas</option>
+                      <option value="forma">Formas</option>
+                      <option value="tipo">Tipos de Artista</option>
+                      <option value="serie">Séries</option>
+                      <option value="local">Locais</option>
+                    </select>
+                  </div>
                 </div>
+
+                <button class="button is-primary is-inverted" @click="focalizar('adicionarAtributo')">Adicionar</button>
               </div>
             </div>
 
@@ -62,7 +66,7 @@
           </nav>
         </div>
 
-        <div class="column is-full-mobile">
+        <div class="column is-full-mobile" ref="adicionarAtributo">
           <div class="card">
             <header class="card-header">
               <p class="card-header-title">Adicionar Atributo</p>
@@ -113,7 +117,25 @@
       <div class="columns">
         <div class="column is-full-mobile">
           <nav class="panel">
-            <div class="panel-block" v-for="concerto in concertos" :key="concerto.id"
+            <div class="panel-heading">
+              <div class="field is-grouped">
+                <div class="control">
+                  <div class="select">
+                    <select v-model="filtroSerieIdConcerto">
+                      <option value="">Todas as séries</option>
+                      <option value="naoSeAplica">Não se aplica</option>
+                      <option v-for="serie in series" :key="serie.id" :value="serie.id">
+                        {{ serie.nome }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <button class="button is-primary is-inverted" @click="focalizar('adicionarConcerto')">Adicionar</button>
+              </div>
+            </div>
+
+            <div class="panel-block" v-for="concerto in concertosFiltradosPorSerie" :key="concerto.id"
               :class="{ 'is-active': concertoSelecionado?.id === concerto.id }" @click="selecionarConcerto(concerto)">
               <p>
                 <strong>
@@ -159,7 +181,7 @@
           </nav>
         </div>
 
-        <div class="column is-full-mobile">
+        <div class="column is-full-mobile" ref="adicionarConcerto">
           <div class="card" v-if="!concertoSelecionado">
             <header class="card-header">
               <p class="card-header-title">Adicionar Concerto</p>
@@ -308,15 +330,19 @@
         <div class="column is-full-mobile">
           <nav class="panel">
             <div class="panel-heading">
-              <div class="control">
-                <div class="select">
-                  <select v-model="filtroCompositorIdObra">
-                    <option value="">Todos os compositores</option>
-                    <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
-                      {{ compositor.detalhe }}
-                    </option>
-                  </select>
+              <div class="field is-grouped">
+                <div class="control">
+                  <div class="select">
+                    <select v-model="filtroCompositorIdObra">
+                      <option value="">Todos os compositores</option>
+                      <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
+                        {{ compositor.detalhe }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
+
+                <button class="button is-primary is-inverted" @click="focalizar('adicionarObra')">Adicionar</button>
               </div>
             </div>
 
@@ -327,11 +353,11 @@
               </p>
             </div>
 
-            <a class="panel-block">{{ this.obras.length }}</a>
+            <a class="panel-block">{{ obrasFiltradasPorCompositor.length }}</a>
           </nav>
         </div>
 
-        <div class="column is-full-mobile">
+        <div class="column is-full-mobile" ref="adicionarObra">
           <div class="card">
             <header class="card-header">
               <p class="card-header-title">Adicionar Obra</p>
@@ -528,6 +554,7 @@
           filtroCompositorIdObra: '',
           filtroTipoArtista: '',
           filtroTipoAtributo: '',
+          filtroSerieIdConcerto: ''
         }
       },
       computed: {
@@ -543,6 +570,14 @@
           }
           if (!this.pesquisa.trim()) return lista;
           return lista.filter(a => a.nome.toLowerCase().includes(this.pesquisa.toLowerCase()));
+        },
+        concertosFiltradosPorSerie() {
+          if (!this.filtroSerieIdConcerto) {
+            return this.concertos;
+          } else if (this.filtroSerieIdConcerto === 'naoSeAplica') {
+            return this.concertos.filter(o => !o.serieId);
+          }
+          return this.concertos.filter(o => o.serieId === this.filtroSerieIdConcerto);
         },
         obrasFiltradasPorCompositor() {
           if (!this.filtroCompositorIdObra) {
@@ -819,8 +854,11 @@
         },
         selecionarConcerto(concerto) {
           this.concertoSelecionado = concerto;
+          this.focalizar('painelObras');
+        },
+        focalizar(entidade) {
           this.$nextTick(() => {
-            const el = this.$refs.painelObras;
+            const el = this.$refs[entidade];
             if (el && el.scrollIntoView) {
               el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
