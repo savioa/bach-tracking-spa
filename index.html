@@ -113,7 +113,7 @@
         <div class="column is-full-mobile">
           <nav class="panel">
             <div class="panel-block" v-for="concerto in concertos" :key="concerto.id"
-              :class="{ 'is-active': concertoSelecionado?.id === concerto.id }" @click="concertoSelecionado = concerto">
+              :class="{ 'is-active': concertoSelecionado?.id === concerto.id }" @click="selecionarConcerto(concerto)">
               <p>
                 <strong>
                   <span v-if="series.find(s => s.id === concerto.serieId) || concerto.nome">
@@ -135,7 +135,7 @@
             </div>
           </nav>
 
-          <nav class="panel" v-if="concertoSelecionado">
+          <nav class="panel" v-if="concertoSelecionado" ref="painelObras">
             <p class="panel-heading">Obras no Concerto</p>
 
             <div class="panel-block" v-for="obra in obrasDoConcerto(concertoSelecionado)" :key="obra.id">
@@ -784,6 +784,15 @@
             .replace('Flat', ' bemol ').replace('Sharp', ' sustenido ')
             .replace('Major', ' maior ').replace('Minor', ' menor ')
             .replace('a ', 'Lá ').replace('b ', 'Si ').replace('c ', 'Dó ').replace('d ', 'Ré ').replace('e ', 'Mi ').replace('f ', 'Fá ').replace('g ', 'Sol ');
+        },
+        selecionarConcerto(concerto) {
+          this.concertoSelecionado = concerto;
+          this.$nextTick(() => {
+            const el = this.$refs.painelObras;
+            if (el && el.scrollIntoView) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
         },
         obrasDoConcerto(concerto) {
           return this.obras.filter(o => concerto.obrasIds?.includes(o.id));
