@@ -134,7 +134,9 @@
                 {{ concerto.data }} - {{ locais.find(l => l.id === concerto.localId)?.nome || 'Sem local' }}
               </p>
             </div>
-            <a class="panel-block"><button @click="exportarDados" class="button is-primary">Exportar {{ this.concertos.length }} Concertos</button></a>
+            <a class="panel-block">
+              <button @click="exportarDados" class="button is-primary">Exportar Concertos</button>
+            </a>
           </nav>
 
           <nav class="panel" v-if="concertoSelecionado" ref="painelObras">
@@ -305,7 +307,20 @@
       <div class="columns">
         <div class="column is-full-mobile">
           <nav class="panel">
-            <div class="panel-block" v-for="obra in obras" :key="obra.id">
+            <div class="panel-heading">
+              <div class="control">
+                <div class="select">
+                  <select v-model="filtroCompositorIdObra">
+                    <option value="">Todos os compositores</option>
+                    <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
+                      {{ compositor.detalhe }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-block" v-for="obra in obrasFiltradasPorCompositor" :key="obra.id">
               <p>
                 <strong>{{ gerarTituloObra(obra).tituloPrimario }}</strong><br>
                 <small>{{ gerarTituloObra(obra).tituloSecundario }}</small>
