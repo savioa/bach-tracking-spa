@@ -115,7 +115,22 @@
             <div class="panel-block" v-for="concerto in concertos" :key="concerto.id"
               :class="{ 'is-active': concertoSelecionado?.id === concerto.id }" @click="concertoSelecionado = concerto">
               <p>
-                {{ concerto.data }} - {{ series.find(s => s.id === concerto.serieId)?.nome }}
+                <strong>
+                  <span v-if="series.find(s => s.id === concerto.serieId) || concerto.nome">
+                    <template v-if="series.find(s => s.id === concerto.serieId)">
+                      {{
+                      series.find(s => s.id === concerto.serieId).nome +
+                      (concerto.instancia ? ' ' + concerto.instancia : '')
+                      }}
+                    </template>
+                    <template v-if="concerto.nome">
+                      <span v-if="series.find(s => s.id === concerto.serieId)"> - </span>{{ concerto.nome }}
+                    </template>
+                  </span>
+                  <span v-else>Sem identificação</span>
+                </strong>
+                <br>
+                {{ concerto.data }} - {{ locais.find(l => l.id === concerto.localId)?.nome || 'Sem local' }}
               </p>
             </div>
           </nav>
@@ -522,19 +537,6 @@
           return this.artistas.filter(a => a.detalhe === this.filtroTipoArtista);
         }
       },
-      watch: {
-        abaSelecionada(novaAba) {
-          if (novaAba === 'atributos' && this.compositores.length === 0) {
-            this.listarAtributos();
-          } else if (novaAba === 'obras' && this.obras.length === 0) {
-            this.listarObras();
-
-            if (this.compositores.length === 0) {
-              this.listarAtributos();
-            }
-          }
-        }
-      },
       methods: {
         abrirDB() {
           const request = indexedDB.open('bach-traking-spa', 1);
@@ -555,6 +557,8 @@
           };
           request.onsuccess = event => {
             this.db = event.target.result;
+            this.listarAtributos();
+            this.listarObras();
             this.listarConcertos();
           };
           request.onerror = event => {
