@@ -571,42 +571,6 @@
           };
         },
         adicionarAtributo() {
-          const txT = this.db.transaction('atributos', 'readwrite');
-          const storeT = txT.objectStore('atributos');
-
-          storeT.delete(187);
-          storeT.delete(165);
-          storeT.delete(152);
-          storeT.delete(168);
-          storeT.delete(188);
-          storeT.delete(194);
-          storeT.delete(172);
-          storeT.delete(162);
-          storeT.delete(179);
-          storeT.delete(161);
-          storeT.delete(166);
-          storeT.delete(183);
-          storeT.delete(153);
-          storeT.delete(184);
-          storeT.delete(197);
-          storeT.delete(198);
-          storeT.delete(199);
-          storeT.delete(200);
-          storeT.delete(201);
-          storeT.delete(239);
-          storeT.delete(240);
-          storeT.delete(241);
-          storeT.delete(242);
-          storeT.delete(243);
-          storeT.delete(244);
-          storeT.delete(245);
-          storeT.delete(221);
-          storeT.delete(222);
-          storeT.delete(223);
-          storeT.delete(224);
-          storeT.delete(225);
-          storeT.delete(226);
-
           if (!this.validarAtributo()) return;
 
           const tipo = this.novoAtributoTipo;
