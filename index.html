@@ -140,7 +140,8 @@
 
             <div class="panel-block" v-for="obra in obrasDoConcerto(concertoSelecionado)" :key="obra.id">
               <p>
-                {{ gerarTituloObra(obra).tituloPrimario }}
+                <strong>{{ gerarTituloObra(obra).tituloPrimario }}</strong><br>
+                {{ this.compositores.find(c => c.id === obra.compositorId).detalhe }}
               </p>
             </div>
           </nav>
@@ -635,12 +636,14 @@
               }
               cursor.continue();
             } else {
-              this.compositores = all.compositores;
-              this.artistas = all.artistas;
-              this.formas = all.formas;
-              this.tipos = all.tipos;
-              this.series = all.series;
-              this.locais = all.locais;
+              const collator = new Intl.Collator('pt', { sensitivity: 'base' });
+
+              this.compositores = [...all.compositores].sort((a, b) => collator.compare(a.detalhe, b.detalhe));
+              this.artistas = [...all.artistas].sort((a, b) => collator.compare(a.nome, b.nome));
+              this.formas = [...all.formas].sort((a, b) => collator.compare(a.nome, b.nome));
+              this.tipos = [...all.tipos].sort((a, b) => collator.compare(a.nome, b.nome));
+              this.series = [...all.series].sort((a, b) => collator.compare(a.nome, b.nome));
+              this.locais = [...all.locais].sort((a, b) => collator.compare(a.nome, b.nome));
             }
           };
         },
@@ -731,6 +734,16 @@
               concertos.push(cursor.value);
               cursor.continue();
             } else {
+              concertos.sort((a, b) => {
+                const [diaA, mesA, anoA] = a.data.substring(0, 10).split('/').map(Number);
+                const [diaB, mesB, anoB] = b.data.substring(0, 10).split('/').map(Number);
+
+                const dateA = new Date(anoA, mesA - 1, diaA);
+                const dateB = new Date(anoB, mesB - 1, diaB);
+
+                return dateB - dateA;
+              });
+
               this.concertos = concertos;
             }
           };
