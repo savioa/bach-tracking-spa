@@ -19,33 +19,33 @@
     <!-- Abas -->
     <div class="tabs">
       <ul>
-        <li :class="{ 'is-active': abaAtiva === 'concertos' }">
-          <a @click="abaAtiva = 'concertos'">Concertos</a>
+        <li :class="{ 'is-active': abaSelecionada === 'concertos' }">
+          <a @click="abaSelecionada = 'concertos'">Concertos</a>
         </li>
-        <li :class="{ 'is-active': abaAtiva === 'obras' }">
-          <a @click="abaAtiva = 'obras'">Obras</a>
+        <li :class="{ 'is-active': abaSelecionada === 'obras' }">
+          <a @click="abaSelecionada = 'obras'">Obras</a>
         </li>
-        <li :class="{ 'is-active': abaAtiva === 'atributos' }">
-          <a @click="abaAtiva = 'atributos'">Atributos</a>
+        <li :class="{ 'is-active': abaSelecionada === 'atributos' }">
+          <a @click="abaSelecionada = 'atributos'">Atributos</a>
         </li>
       </ul>
     </div>
 
     <!-- Atributos -->
-    <div v-if="abaAtiva === 'atributos'">
+    <div v-if="abaSelecionada === 'atributos'">
       <div class="columns">
         <div class="column is-full-mobile">
           <nav class="panel">
             <div class="panel-heading">
               <div class="control">
                 <div class="select">
-                  <select v-model="abaAtributosAtiva">
-                    <option value="compositores">Compositores</option>
-                    <option value="artistas">Artistas</option>
-                    <option value="formas">Formas</option>
-                    <option value="tipos">Tipos de Artista</option>
-                    <option value="series">Séries</option>
-                    <option value="locais">Locais</option>
+                  <select v-model="filtroTipoAtributo">
+                    <option value="compositor">Compositores</option>
+                    <option value="artista">Artistas</option>
+                    <option value="forma">Formas</option>
+                    <option value="tipo">Tipos de Artista</option>
+                    <option value="serie">Séries</option>
+                    <option value="local">Locais</option>
                   </select>
                 </div>
               </div>
@@ -57,9 +57,7 @@
               </p>
             </div>
 
-            <a class="panel-block" v-for="item in atributosFiltrados" :key="item.id">
-              {{ item.nome }} <span v-if="abaAtributos === 'artistas'">({{ item.detalhe }})</span>
-            </a>
+            <a class="panel-block" v-for="item in atributosFiltrados" :key="item.id">{{ item.nome }}</a>
           </nav>
         </div>
 
@@ -110,7 +108,7 @@
     </div>
 
     <!-- Concertos -->
-    <div v-if="abaAtiva === 'concertos'">
+    <div v-if="abaSelecionada === 'concertos'">
       <div class="columns">
         <div class="column is-full-mobile">
           <nav class="panel">
@@ -166,7 +164,7 @@
                 <label class="label">Série</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novoConcertoSerie">
+                    <select v-model="novoConcertoSerieId">
                       <option disabled value="">Não definida</option>
                       <option v-for="serie in series" :key="serie.id" :value="serie.id">
                         {{ serie.nome }}
@@ -187,7 +185,7 @@
                 <label class="label">Local</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novoConcertoLocal">
+                    <select v-model="novoConcertoLocalId">
                       <option disabled value="">Não definido</option>
                       <option v-for="local in locais" :key="local.id" :value="local.id">
                         {{ local.nome }}
@@ -214,7 +212,7 @@
                 <label class="label">Compositor</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="compositorFiltroParaObra">
+                    <select v-model="filtroCompositorIdObra">
                       <option value="">Todos os compositores</option>
                       <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
                         {{ compositor.detalhe }}
@@ -228,7 +226,7 @@
                 <label class="label">Obra</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="obraSelecionadaParaAdicionar">
+                    <select v-model="obraSelecionadaId">
                       <option disabled value="">Selecione uma obra</option>
                       <option v-for="obra in obrasFiltradasPorCompositor" :value="obra.id">{{
                         gerarTituloObra(obra).tituloPrimario }}</option>
@@ -252,7 +250,7 @@
                 <label class="label">Tipo de Artista</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="tipoFiltroParaArtista">
+                    <select v-model="filtroTipoArtista">
                       <option value="">Todos os tipos de artista</option>
                       <option v-for="tipo in tipos" :key="tipo.id" :value="tipo.nome">
                         {{ tipo.nome }}
@@ -266,7 +264,7 @@
                 <label class="label">Artista</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="artistaSelecionadoParaAdicionar">
+                    <select v-model="artistaSelecionadoId">
                       <option disabled value="">Selecione um artista</option>
                       <option v-for="artista in artistasFiltradosPorTipo" :value="artista.id">{{ artista.nome }}
                       </option>
@@ -285,7 +283,7 @@
     </div>
 
     <!-- Obras -->
-    <div v-if="abaAtiva === 'obras'">
+    <div v-if="abaSelecionada === 'obras'">
       <div class="columns">
         <div class="column is-full-mobile">
           <nav class="panel">
@@ -309,7 +307,7 @@
                 <label class="label">Compositor</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novaObraCompositor">
+                    <select v-model="novaObraCompositorId">
                       <option disabled value="">Selecione um compositor</option>
                       <option v-for="compositor in compositores" :key="compositor.id" :value="compositor.id">
                         {{ compositor.detalhe }}
@@ -330,7 +328,7 @@
                 <label class="label">Forma</label>
                 <div class="control">
                   <div class="select">
-                    <select v-model="novaObraForma">
+                    <select v-model="novaObraFormaId">
                       <option disabled value="">Não definida</option>
                       <option v-for="forma in formas" :key="forma.id" :value="forma.id">
                         {{ forma.nome }}
@@ -447,8 +445,7 @@
         return {
           db: null,
 
-          abaAtiva: 'concertos',
-          abaAtributosAtiva: 'compositores',
+          abaSelecionada: 'concertos',
 
           tiposAtributos: [
             { id: 'compositor', nome: 'Compositor' },
@@ -465,13 +462,13 @@
 
           novoConcertoNome: '',
           novoConcertoData: '',
-          novoConcertoSerie: '',
+          novoConcertoSerieId: '',
           novoConcertoInstancia: '',
-          novoConcertoLocal: '',
+          novoConcertoLocalId: '',
 
-          novaObraCompositor: '',
+          novaObraCompositorId: '',
           novaObraNome: '',
-          novaObraForma: '',
+          novaObraFormaId: '',
           novaObraInstrumentos: '',
           novaObraNumero: '',
           novaObraTonalidade: '',
@@ -491,37 +488,51 @@
           pesquisa: '',
 
           concertoSelecionado: null,
-          obraSelecionadaParaAdicionar: '',
-          artistaSelecionadoParaAdicionar: '',
-          compositorFiltroParaObra: '',
-          tipoFiltroParaArtista: '',
+          obraSelecionadaId: '',
+          artistaSelecionadoId: '',
+          filtroCompositorIdObra: '',
+          filtroTipoArtista: '',
+          filtroTipoAtributo: '',
         }
       },
       computed: {
         atributosFiltrados() {
           let lista = [];
-          switch (this.abaAtributosAtiva) {
-            case 'compositores': lista = this.compositores; break;
-            case 'artistas': lista = this.artistas; break;
-            case 'formas': lista = this.formas; break;
-            case 'tipos': lista = this.tipos; break;
-            case 'series': lista = this.series; break;
-            case 'locais': lista = this.locais; break;
+          switch (this.filtroTipoAtributo) {
+            case 'compositor': lista = this.compositores; break;
+            case 'artista': lista = this.artistas; break;
+            case 'forma': lista = this.formas; break;
+            case 'tipo': lista = this.tipos; break;
+            case 'serie': lista = this.series; break;
+            case 'local': lista = this.locais; break;
           }
           if (!this.pesquisa.trim()) return lista;
           return lista.filter(a => a.nome.toLowerCase().includes(this.pesquisa.toLowerCase()));
         },
         obrasFiltradasPorCompositor() {
-          if (!this.compositorFiltroParaObra) {
+          if (!this.filtroCompositorIdObra) {
             return this.obras;
           }
-          return this.obras.filter(o => o.compositorId === this.compositorFiltroParaObra);
+          return this.obras.filter(o => o.compositorId === this.filtroCompositorIdObra);
         },
         artistasFiltradosPorTipo() {
-          if (!this.tipoFiltroParaArtista) {
+          if (!this.filtroTipoArtista) {
             return this.artistas;
           }
-          return this.artistas.filter(a => a.detalhe === this.tipoFiltroParaArtista);
+          return this.artistas.filter(a => a.detalhe === this.filtroTipoArtista);
+        }
+      },
+      watch: {
+        abaSelecionada(novaAba) {
+          if (novaAba === 'atributos' && this.compositores.length === 0) {
+            this.listarAtributos();
+          } else if (novaAba === 'obras' && this.obras.length === 0) {
+            this.listarObras();
+
+            if (this.compositores.length === 0) {
+              this.listarAtributos();
+            }
+          }
         }
       },
       methods: {
@@ -544,8 +555,6 @@
           };
           request.onsuccess = event => {
             this.db = event.target.result;
-            this.listarAtributos();
-            this.listarObras();
             this.listarConcertos();
           };
           request.onerror = event => {
@@ -579,8 +588,8 @@
 
               const requestAdd = txAdd.objectStore('atributos').add(obj);
               requestAdd.onsuccess = (event) => {
-                const idGerado = event.target.result;
-                const novoObj = { ...obj, id: idGerado };
+                const id = event.target.result;
+                const novoObj = { ...obj, id };
 
                 switch (tipo) {
                   case 'compositor': this.compositores.push(novoObj); break;
@@ -632,11 +641,11 @@
           };
         },
         adicionarObra() {
-          if (!this.novaObraCompositor) return;
+          if (!this.novaObraCompositorId) return;
 
-          const compositorId = this.novaObraCompositor;
+          const compositorId = this.novaObraCompositorId;
           const nome = this.novaObraNome.trim();
-          const formaId = this.novaObraForma;
+          const formaId = this.novaObraFormaId;
           const instrumentos = this.novaObraInstrumentos.trim();
           const numero = this.novaObraNumero.trim();
           const tonalidade = this.novaObraTonalidade;
@@ -648,12 +657,14 @@
           const obj = { compositorId, nome, formaId, instrumentos, numero, tonalidade, opus, catalogo, apelido, detalhe };
 
           const tx = this.db.transaction('obras', 'readwrite');
-          tx.objectStore('obras').add(obj);
-          tx.oncomplete = () => {
-            this.obras.push(obj);
-            this.novaObraCompositor = '';
+          const request = tx.objectStore('obras').add(obj);
+          request.onsuccess = (event) => {
+            const id = event.target.result;
+            this.obras.push({ ...obj, id });
+
+            this.novaObraCompositorId = '';
             this.novaObraNome = '';
-            this.novaObraForma = '';
+            this.novaObraFormaId = '';
             this.novaObraInstrumentos = '';
             this.novaObraNumero = '';
             this.novaObraTonalidade = '';
@@ -681,9 +692,9 @@
         adicionarConcerto() {
           const nome = this.novoConcertoNome.trim();
           const data = this.novoConcertoData.trim();
-          const serieId = this.novoConcertoSerie;
+          const serieId = this.novoConcertoSerieId;
           const instancia = parseInt(this.novoConcertoInstancia, 10);
-          const localId = this.novoConcertoLocal;
+          const localId = this.novoConcertoLocalId;
 
           if (!data) return;
 
@@ -694,15 +705,15 @@
           const requestAdd = tx.objectStore('concertos').add(obj);
 
           requestAdd.onsuccess = (event) => {
-            const idGerado = event.target.result;
-            const novoObj = { ...obj, id: idGerado };
+            const id = event.target.result;
+            const novoObj = { ...obj, id };
             this.concertos.push(novoObj);
 
             this.novoConcertoNome = '';
             this.novoConcertoData = '';
-            this.novoConcertoSerie = '';
+            this.novoConcertoSerieId = '';
             this.novoConcertoInstancia = '';
-            this.novoConcertoLocal = '';
+            this.novoConcertoLocalId = '';
           }
         },
         listarConcertos() {
@@ -777,7 +788,7 @@
           return this.artistas.filter(a => concerto.artistasIds?.includes(a.id));
         },
         adicionarObraAoConcerto() {
-          const obraId = this.obraSelecionadaParaAdicionar;
+          const obraId = this.obraSelecionadaId;
           if (!obraId || !this.concertoSelecionado) return;
 
           if (!this.concertoSelecionado.obrasIds) {
@@ -800,7 +811,7 @@
             if (idx !== -1) {
               this.concertos[idx] = { ...objLimpo };
             }
-            this.obraSelecionadaParaAdicionar = '';
+            this.obraSelecionadaId = '';
           };
 
           req.onerror = (event) => {
@@ -808,7 +819,7 @@
           };
         },
         adicionarArtistaAoConcerto() {
-          const artistaId = this.artistaSelecionadoParaAdicionar;
+          const artistaId = this.artistaSelecionadoId;
           if (!artistaId || !this.concertoSelecionado) return;
 
           if (!this.concertoSelecionado.artistasIds) {
@@ -831,7 +842,7 @@
             if (idx !== -1) {
               this.concertos[idx] = { ...objLimpo };
             }
-            this.artistaSelecionadoParaAdicionar = '';
+            this.artistaSelecionadoId = '';
           };
 
           req.onerror = (event) => {
